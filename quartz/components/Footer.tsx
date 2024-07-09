@@ -15,7 +15,7 @@ export default ((opts?: Options) => {
       <footer class={`${displayClass ?? ""}`}>
         <hr />
         <p>
-          {i18n(cfg.locale).components.footer.createdBy}{" "}
+          {i18n(cfg.locale).components.footer.createdWith}{" "}
           <a href="https://quartz.jzhao.xyz/"> Natalia G. Sarmiento</a> © {year}
         </p>
         <ul>
