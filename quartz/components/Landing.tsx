@@ -6,7 +6,7 @@ export const CARDS = {
   basics: (
     <a href={"/basics"}>
       <div class="card card-1">
-        <p class="card-title">Who am I?</p>
+        <p class="card-title">Who am I</p>
         <p class="card-subhead">Issue 001</p>
         <img src="/static/1-illo.png" class="card-illustration-1" />
       </div>
