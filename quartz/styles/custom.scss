@@ -1,3 +1,146 @@
 @use "./base.scss";
 
 // put your custom CSS here!
+body {
+  background-image: url("/static/bg.png") !important;
+  margin: 0;
+}
+
+@font-face {
+  font-family: "Tiempos";
+  src: url("/static/tiempos-light.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* HEADER AT TOP OF WEBSITE */
+.marquee {
+  background-color: black;
+  overflow: hidden;
+  width: 100%;
+  font-family: monospace;
+  white-space: nowrap;
+  height: 40px;
+}
+
+.marquee p {
+  color: white;
+  font-weight: 700;
+  animation: loopText 15s infinite linear;
+  line-height: unset;
+}
+
+@keyframes loopText {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+/* HEADER AT TOP OF WEBSITE */
+.content-container {
+  width: 70%;
+  margin: 0 auto;
+  padding-bottom: 128px;
+}
+
+.article-header {
+  border-radius: 5px;
+  margin-top: 50px;
+  padding: 25px;
+  border: 1px solid #5687d1;
+  background: #6096e6;
+
+  h1 {
+    color: #f9f5e9;
+    padding: 0px;
+    margin: 0;
+  }
+
+  p {
+    color: #f9f5e9;
+    padding: 0;
+    padding-top: 5px;
+    margin: 0;
+  }
+}
+
+body[data-slug="getting-started"] .article-header {
+  border: #949c61;
+  background: #9ca665;
+}
+
+body[data-slug="growing-people"] .article-header {
+  border: #ad7018;
+  background: #bd7c18;
+}
+
+body[data-slug="superboosting-ideas"] .article-header {
+  border: #9f7389;
+  background: #ac7d94;
+}
+
+body[data-slug="maintenance"] .article-header {
+  border: #d37662;
+  background: #eb846d;
+}
+
+.navigation-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+body[data-slug="basics"] .navigation-container {
+  display: display;
+  justify-content: flex-end;
+}
+
+body[data-slug="maintenance"] .navigation-container {
+  display: display;
+  justify-content: flex-start;
+}
+
+a.navigation-button {
+  border-radius: 5px;
+  padding: 15px;
+  border: 1px solid #5687d1;
+  background: #6096e6;
+  width: 17%;
+  text-align: center;
+  transition: all 0.3s;
+  transform: scale(1);
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+
+  p {
+    color: #f9f5e9;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+body[data-slug="getting-started"] a.navigation-button {
+  border: #949c61;
+  background: #9ca665;
+}
+
+body[data-slug="growing-people"] a.navigation-button {
+  border: #ad7018;
+  background: #bd7c18;
+}
+
+body[data-slug="superboosting-ideas"] a.navigation-button {
+  border: #9f7389;
+  background: #ac7d94;
+}
+
+body[data-slug="maintenance"] a.navigation-button {
+  border: #d37662;
+  background: #eb846d;
+}
