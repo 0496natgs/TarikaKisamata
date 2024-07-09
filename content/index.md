@@ -1,6 +1,3 @@
 ---
-title: Tarika Kisamata Writing
+title: Welcome to Socratica
 ---
-
-This is a blank Quartz installation.
-See the [documentation](https://quartz.jzhao.xyz) for how to get started.

@@ -1,28 +1,20 @@
 ---
 title: Private Pages
 tags:
-  - feature/filter
+  - plugin/filter
 ---
 
 There may be some notes you want to avoid publishing as a website. Quartz supports this through two mechanisms which can be used in conjunction:
 
 ## Filter Plugins
 
-[[making plugins#Filters|Filter plugins]] are plugins that filter out content based off of certain criteria. By default, Quartz uses the [[RemoveDrafts]] plugin which filters out any note that has `draft: true` in the frontmatter.
+[[making plugins#Filters|Filter plugins]] are plugins that filter out content based off of certain criteria. By default, Quartz uses the `Plugin.RemoveDrafts` plugin which filters out any note that has `draft: true` in the frontmatter.
 
-If you'd like to only publish a select number of notes, you can instead use [[ExplicitPublish]] which will filter out all notes except for any that have `publish: true` in the frontmatter.
-
-> [!warning]
-> Regardless of the filter plugin used, **all non-markdown files will be emitted and available publically in the final build.** This includes files such as images, voice recordings, PDFs, etc. One way to prevent this and still be able to embed local images is to create a folder specifically for public media and add the following two patterns to the ignorePatterns array.
->
-> `"!(PublicMedia)**/!(*.md)", "!(*.md)"`
+If you'd like to only publish a select number of notes, you can instead use `Plugin.ExplicitPublish` which will filter out all notes except for any that have `publish: true` in the frontmatter.
 
 ## `ignorePatterns`
 
-This is a field in `quartz.config.ts` under the main [[configuration]] which allows you to specify a list of patterns to effectively exclude from parsing all together. Any valid [fast-glob](https://github.com/mrmlnc/fast-glob#pattern-syntax) pattern works here.
-
-> [!note]
-> Bash's glob syntax is slightly different from fast-glob's and using bash's syntax may lead to unexpected results.
+This is a field in `quartz.config.ts` under the main [[configuration]] which allows you to specify a list of patterns to effectively exclude from parsing all together. Any valid [glob](https://github.com/mrmlnc/fast-glob#pattern-syntax) pattern works here.
 
 Common examples include:
 
