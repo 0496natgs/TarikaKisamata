@@ -1,5 +1,5 @@
 ---
-title: Welcome to Quartz
+title: Tarika Kisamata Writing
 ---
 
 This is a blank Quartz installation.
