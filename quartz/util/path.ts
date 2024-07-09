@@ -1,9 +1,4 @@
-import { slug as slugAnchor } from "github-slugger"
-import type { Element as HastElement } from "hast"
-import rfdc from "rfdc"
-
-export const clone = rfdc()
-
+import { slug } from "github-slugger"
 // this file must be isomorphic so it can't use node libs (e.g. path)
 
 export const QUARTZ = "quartz"
@@ -23,22 +18,22 @@ export type FullSlug = SlugLike<"full">
 export function isFullSlug(s: string): s is FullSlug {
   const validStart = !(s.startsWith(".") || s.startsWith("/"))
   const validEnding = !s.endsWith("/")
-  return validStart && validEnding && !containsForbiddenCharacters(s)
+  return validStart && validEnding && !_containsForbiddenCharacters(s)
 }
 
 /** Shouldn't be a relative path and shouldn't have `/index` as an ending or a file extension. It _can_ however have a trailing slash to indicate a folder path. */
 export type SimpleSlug = SlugLike<"simple">
 export function isSimpleSlug(s: string): s is SimpleSlug {
-  const validStart = !(s.startsWith(".") || (s.length > 1 && s.startsWith("/")))
-  const validEnding = !endsWith(s, "index")
-  return validStart && !containsForbiddenCharacters(s) && validEnding && !_hasFileExtension(s)
+  const validStart = !(s.startsWith(".") || s.startsWith("/"))
+  const validEnding = !(s.endsWith("/index") || s === "index")
+  return validStart && !_containsForbiddenCharacters(s) && validEnding && !_hasFileExtension(s)
 }
 
 /** Can be found on `href`s but can also be constructed for client-side navigation (e.g. search and graph) */
 export type RelativeURL = SlugLike<"relative">
 export function isRelativeURL(s: string): s is RelativeURL {
   const validStart = /^\.{1,2}/.test(s)
-  const validEnding = !endsWith(s, "index")
+  const validEnding = !(s.endsWith("/index") || s === "index")
   return validStart && validEnding && ![".md", ".html"].includes(_getFileExtension(s) ?? "")
 }
 
@@ -47,33 +42,22 @@ export function getFullSlug(window: Window): FullSlug {
   return res
 }
 
-function sluggify(s: string): string {
-  return s
-    .split("/")
-    .map((segment) =>
-      segment
-        .replace(/\s/g, "-")
-        .replace(/&/g, "-and-")
-        .replace(/%/g, "-percent")
-        .replace(/\?/g, "")
-        .replace(/#/g, ""),
-    )
-    .join("/") // always use / as sep
-    .replace(/\/$/, "")
-}
-
 export function slugifyFilePath(fp: FilePath, excludeExt?: boolean): FullSlug {
-  fp = stripSlashes(fp) as FilePath
+  fp = _stripSlashes(fp) as FilePath
   let ext = _getFileExtension(fp)
   const withoutFileExt = fp.replace(new RegExp(ext + "$"), "")
   if (excludeExt || [".md", ".html", undefined].includes(ext)) {
     ext = ""
   }
 
-  let slug = sluggify(withoutFileExt)
+  let slug = withoutFileExt
+    .split("/")
+    .map((segment) => segment.replace(/\s/g, "-").replace(/%/g, "-percent").replace(/\?/g, "-q")) // slugify all segments
+    .join("/") // always use / as sep
+    .replace(/\/$/, "") // remove trailing slash
 
   // treat _index as index
-  if (endsWith(slug, "_index")) {
+  if (_endsWith(slug, "_index")) {
     slug = slug.replace(/_index$/, "index")
   }
 
@@ -81,68 +65,23 @@ export function slugifyFilePath(fp: FilePath, excludeExt?: boolean): FullSlug {
 }
 
 export function simplifySlug(fp: FullSlug): SimpleSlug {
-  const res = stripSlashes(trimSuffix(fp, "index"), true)
-  return (res.length === 0 ? "/" : res) as SimpleSlug
+  return _stripSlashes(_trimSuffix(fp, "index"), true) as SimpleSlug
 }
 
 export function transformInternalLink(link: string): RelativeURL {
   let [fplike, anchor] = splitAnchor(decodeURI(link))
 
-  const folderPath = isFolderPath(fplike)
+  const folderPath = _isFolderPath(fplike)
   let segments = fplike.split("/").filter((x) => x.length > 0)
-  let prefix = segments.filter(isRelativeSegment).join("/")
-  let fp = segments.filter((seg) => !isRelativeSegment(seg) && seg !== "").join("/")
+  let prefix = segments.filter(_isRelativeSegment).join("/")
+  let fp = segments.filter((seg) => !_isRelativeSegment(seg) && seg !== "").join("/")
 
   // manually add ext here as we want to not strip 'index' if it has an extension
   const simpleSlug = simplifySlug(slugifyFilePath(fp as FilePath))
-  const joined = joinSegments(stripSlashes(prefix), stripSlashes(simpleSlug))
+  const joined = joinSegments(_stripSlashes(prefix), _stripSlashes(simpleSlug))
   const trail = folderPath ? "/" : ""
   const res = (_addRelativeToStart(joined) + trail + anchor) as RelativeURL
   return res
-}
-
-// from micromorph/src/utils.ts
-// https://github.com/natemoo-re/micromorph/blob/main/src/utils.ts#L5
-const _rebaseHtmlElement = (el: Element, attr: string, newBase: string | URL) => {
-  const rebased = new URL(el.getAttribute(attr)!, newBase)
-  el.setAttribute(attr, rebased.pathname + rebased.hash)
-}
-export function normalizeRelativeURLs(el: Element | Document, destination: string | URL) {
-  el.querySelectorAll('[href^="./"], [href^="../"]').forEach((item) =>
-    _rebaseHtmlElement(item, "href", destination),
-  )
-  el.querySelectorAll('[src^="./"], [src^="../"]').forEach((item) =>
-    _rebaseHtmlElement(item, "src", destination),
-  )
-}
-
-const _rebaseHastElement = (
-  el: HastElement,
-  attr: string,
-  curBase: FullSlug,
-  newBase: FullSlug,
-) => {
-  if (el.properties?.[attr]) {
-    if (!isRelativeURL(String(el.properties[attr]))) {
-      return
-    }
-
-    const rel = joinSegments(resolveRelative(curBase, newBase), "..", el.properties[attr] as string)
-    el.properties[attr] = rel
-  }
-}
-
-export function normalizeHastElement(rawEl: HastElement, curBase: FullSlug, newBase: FullSlug) {
-  const el = clone(rawEl) // clone so we dont modify the original page
-  _rebaseHastElement(el, "src", curBase, newBase)
-  _rebaseHastElement(el, "href", curBase, newBase)
-  if (el.children) {
-    el.children = el.children.map((child) =>
-      normalizeHastElement(child as HastElement, curBase, newBase),
-    )
-  }
-
-  return el
 }
 
 // resolve /a/b/c to ../..
@@ -168,17 +107,18 @@ export function resolveRelative(current: FullSlug, target: FullSlug | SimpleSlug
 
 export function splitAnchor(link: string): [string, string] {
   let [fp, anchor] = link.split("#", 2)
-  if (fp.endsWith(".pdf")) {
-    return [fp, anchor === undefined ? "" : `#${anchor}`]
-  }
   anchor = anchor === undefined ? "" : "#" + slugAnchor(anchor)
   return [fp, anchor]
+}
+
+export function slugAnchor(anchor: string) {
+  return slug(anchor)
 }
 
 export function slugTag(tag: string) {
   return tag
     .split("/")
-    .map((tagSegment) => sluggify(tagSegment))
+    .map((tagSegment) => slug(tagSegment))
     .join("/")
 }
 
@@ -209,8 +149,8 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
   if (opts.strategy === "relative") {
     return targetSlug as RelativeURL
   } else {
-    const folderTail = isFolderPath(targetSlug) ? "/" : ""
-    const canonicalSlug = stripSlashes(targetSlug.slice(".".length))
+    const folderTail = _isFolderPath(targetSlug) ? "/" : ""
+    const canonicalSlug = _stripSlashes(targetSlug.slice(".".length))
     let [targetCanonical, targetAnchor] = splitAnchor(canonicalSlug)
 
     if (opts.strategy === "shortest") {
@@ -233,29 +173,28 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
   }
 }
 
-// path helpers
-function isFolderPath(fplike: string): boolean {
+function _isFolderPath(fplike: string): boolean {
   return (
     fplike.endsWith("/") ||
-    endsWith(fplike, "index") ||
-    endsWith(fplike, "index.md") ||
-    endsWith(fplike, "index.html")
+    _endsWith(fplike, "index") ||
+    _endsWith(fplike, "index.md") ||
+    _endsWith(fplike, "index.html")
   )
 }
 
-export function endsWith(s: string, suffix: string): boolean {
+function _endsWith(s: string, suffix: string): boolean {
   return s === suffix || s.endsWith("/" + suffix)
 }
 
-function trimSuffix(s: string, suffix: string): string {
-  if (endsWith(s, suffix)) {
+function _trimSuffix(s: string, suffix: string): string {
+  if (_endsWith(s, suffix)) {
     s = s.slice(0, -suffix.length)
   }
   return s
 }
 
-function containsForbiddenCharacters(s: string): boolean {
-  return s.includes(" ") || s.includes("#") || s.includes("?") || s.includes("&")
+function _containsForbiddenCharacters(s: string): boolean {
+  return s.includes(" ") || s.includes("#") || s.includes("?")
 }
 
 function _hasFileExtension(s: string): boolean {
@@ -266,11 +205,11 @@ function _getFileExtension(s: string): string | undefined {
   return s.match(/\.[A-Za-z0-9]+$/)?.[0]
 }
 
-function isRelativeSegment(s: string): boolean {
+function _isRelativeSegment(s: string): boolean {
   return /^\.{0,2}$/.test(s)
 }
 
-export function stripSlashes(s: string, onlyStripPrefix?: boolean): string {
+export function _stripSlashes(s: string, onlyStripPrefix?: boolean): string {
   if (s.startsWith("/")) {
     s = s.substring(1)
   }

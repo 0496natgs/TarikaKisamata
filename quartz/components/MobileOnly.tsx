@@ -3,7 +3,7 @@ import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } fro
 export default ((component?: QuartzComponent) => {
   if (component) {
     const Component = component
-    const MobileOnly: QuartzComponent = (props: QuartzComponentProps) => {
+    function MobileOnly(props: QuartzComponentProps) {
       return <Component displayClass="mobile-only" {...props} />
     }
 

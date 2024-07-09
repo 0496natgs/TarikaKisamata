@@ -14,11 +14,8 @@ import {
 } from "../../util/path"
 import { defaultListPageLayout, sharedPageComponents } from "../../../quartz.layout"
 import { TagContent } from "../../components"
-import { write } from "./helpers"
-import { i18n } from "../../i18n"
-import DepGraph from "../../depgraph"
 
-export const TagPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpts) => {
+export const TagPage: QuartzEmitterPlugin<FullPageLayout> = (userOpts) => {
   const opts: FullPageLayout = {
     ...sharedPageComponents,
     ...defaultListPageLayout,
@@ -35,28 +32,7 @@ export const TagPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpts) 
     getQuartzComponents() {
       return [Head, Header, Body, ...header, ...beforeBody, pageBody, ...left, ...right, Footer]
     },
-    async getDependencyGraph(ctx, content, _resources) {
-      const graph = new DepGraph<FilePath>()
-
-      for (const [_tree, file] of content) {
-        const sourcePath = file.data.filePath!
-        const tags = (file.data.frontmatter?.tags ?? []).flatMap(getAllSegmentPrefixes)
-        // if the file has at least one tag, it is used in the tag index page
-        if (tags.length > 0) {
-          tags.push("index")
-        }
-
-        for (const tag of tags) {
-          graph.addEdge(
-            sourcePath,
-            joinSegments(ctx.argv.output, "tags", tag + ".html") as FilePath,
-          )
-        }
-      }
-
-      return graph
-    },
-    async emit(ctx, content, resources): Promise<FilePath[]> {
+    async emit(ctx, content, resources, emit): Promise<FilePath[]> {
       const fps: FilePath[] = []
       const allFiles = content.map((c) => c[1].data)
       const cfg = ctx.cfg.configuration
@@ -64,16 +40,12 @@ export const TagPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpts) 
       const tags: Set<string> = new Set(
         allFiles.flatMap((data) => data.frontmatter?.tags ?? []).flatMap(getAllSegmentPrefixes),
       )
-
       // add base tag
       tags.add("index")
 
       const tagDescriptions: Record<string, ProcessedContent> = Object.fromEntries(
         [...tags].map((tag) => {
-          const title =
-            tag === "index"
-              ? i18n(cfg.locale).pages.tagContent.tagIndex
-              : `${i18n(cfg.locale).pages.tagContent.tag}: ${tag}`
+          const title = tag === "" ? "Tag Index" : `Tag: #${tag}`
           return [
             tag,
             defaultProcessedContent({
@@ -99,7 +71,6 @@ export const TagPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpts) 
         const externalResources = pageResources(pathToRoot(slug), resources)
         const [tree, file] = tagDescriptions[tag]
         const componentData: QuartzComponentProps = {
-          ctx,
           fileData: file.data,
           externalResources,
           cfg,
@@ -108,9 +79,8 @@ export const TagPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpts) 
           allFiles,
         }
 
-        const content = renderPage(cfg, slug, componentData, opts, externalResources)
-        const fp = await write({
-          ctx,
+        const content = renderPage(slug, componentData, opts, externalResources)
+        const fp = await emit({
           content,
           slug: file.data.slug!,
           ext: ".html",

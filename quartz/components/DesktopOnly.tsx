@@ -3,7 +3,7 @@ import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } fro
 export default ((component?: QuartzComponent) => {
   if (component) {
     const Component = component
-    const DesktopOnly: QuartzComponent = (props: QuartzComponentProps) => {
+    function DesktopOnly(props: QuartzComponentProps) {
       return <Component displayClass="desktop-only" {...props} />
     }
 

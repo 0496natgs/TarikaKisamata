@@ -10,18 +10,15 @@ import {
   FilePath,
   FullSlug,
   SimpleSlug,
-  stripSlashes,
+  _stripSlashes,
   joinSegments,
   pathToRoot,
   simplifySlug,
 } from "../../util/path"
 import { defaultListPageLayout, sharedPageComponents } from "../../../quartz.layout"
 import { FolderContent } from "../../components"
-import { write } from "./helpers"
-import { i18n } from "../../i18n"
-import DepGraph from "../../depgraph"
 
-export const FolderPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpts) => {
+export const FolderPage: QuartzEmitterPlugin<FullPageLayout> = (userOpts) => {
   const opts: FullPageLayout = {
     ...sharedPageComponents,
     ...defaultListPageLayout,
@@ -38,23 +35,7 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpt
     getQuartzComponents() {
       return [Head, Header, Body, ...header, ...beforeBody, pageBody, ...left, ...right, Footer]
     },
-    async getDependencyGraph(_ctx, content, _resources) {
-      // Example graph:
-      // nested/file.md --> nested/index.html
-      // nested/file2.md ------^
-      const graph = new DepGraph<FilePath>()
-
-      content.map(([_tree, vfile]) => {
-        const slug = vfile.data.slug
-        const folderName = path.dirname(slug ?? "") as SimpleSlug
-        if (slug && folderName !== "." && folderName !== "tags") {
-          graph.addEdge(vfile.data.filePath!, joinSegments(folderName, "index.html") as FilePath)
-        }
-      })
-
-      return graph
-    },
-    async emit(ctx, content, resources): Promise<FilePath[]> {
+    async emit(ctx, content, resources, emit): Promise<FilePath[]> {
       const fps: FilePath[] = []
       const allFiles = content.map((c) => c[1].data)
       const cfg = ctx.cfg.configuration
@@ -75,16 +56,13 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpt
           folder,
           defaultProcessedContent({
             slug: joinSegments(folder, "index") as FullSlug,
-            frontmatter: {
-              title: `${i18n(cfg.locale).pages.folderContent.folder}: ${folder}`,
-              tags: [],
-            },
+            frontmatter: { title: `Folder: ${folder}`, tags: [] },
           }),
         ]),
       )
 
       for (const [tree, file] of content) {
-        const slug = stripSlashes(simplifySlug(file.data.slug!)) as SimpleSlug
+        const slug = _stripSlashes(simplifySlug(file.data.slug!)) as SimpleSlug
         if (folders.has(slug)) {
           folderDescriptions[slug] = [tree, file]
         }
@@ -95,7 +73,6 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpt
         const externalResources = pageResources(pathToRoot(slug), resources)
         const [tree, file] = folderDescriptions[folder]
         const componentData: QuartzComponentProps = {
-          ctx,
           fileData: file.data,
           externalResources,
           cfg,
@@ -104,9 +81,8 @@ export const FolderPage: QuartzEmitterPlugin<Partial<FullPageLayout>> = (userOpt
           allFiles,
         }
 
-        const content = renderPage(cfg, slug, componentData, opts, externalResources)
-        const fp = await write({
-          ctx,
+        const content = renderPage(slug, componentData, opts, externalResources)
+        const fp = await emit({
           content,
           slug,
           ext: ".html",
