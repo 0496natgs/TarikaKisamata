@@ -16,7 +16,7 @@ export default ((opts?: Options) => {
         <hr />
         <p>
           {i18n(cfg.locale).components.footer.createdWith}{" "}
-          <a href="https://quartz.jzhao.xyz/"> Natalia G. Sarmiento</a> © {year}
+          <a href=""> Natalia G. Sarmiento</a> © {year}
         </p>
         <ul>
           {Object.entries(links).map(([text, link]) => (
