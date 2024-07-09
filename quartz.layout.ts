@@ -29,7 +29,7 @@ export const defaultContentPageLayout: PageLayout = {
     // Component.Darkmode(),
     Component.DesktopOnly(Component.TableOfContents()),
     Component.DesktopOnly(Component.Explorer()),
-    Component.DesktopOnly(Component.Graph()),
+    //Component.DesktopOnly(Component.Graph()),
     // Component.DesktopOnly(Component.Backlinks()),
   ],
   right: [
