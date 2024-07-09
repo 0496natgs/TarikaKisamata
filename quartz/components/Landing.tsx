@@ -55,10 +55,10 @@ export default (() => {
     return (
       <div>
         <div class="content-container">
-          <p class="landing-header">Welcome to Socratica</p>
+          <p class="landing-header">Tarika Kisamata</p>
           <p class="page-subhead">
             This is a guide •{" "}
-            <a href="https://www.socratica.info/" target="_blank">
+            <a href="https://tarikakisamata.com/" target="_blank">
               Back to main site
             </a>{" "}
             •{" "}
