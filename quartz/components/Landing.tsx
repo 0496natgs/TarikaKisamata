@@ -62,11 +62,11 @@ export default (() => {
               Back to main site
             </a>{" "}
             •{" "}
-            <a href="https://github.com/Socratica-Org/toolbox" target="_blank">
+            <a href="https://tarikakisamata.com" target="_blank">
               Contribute
             </a>{" "}
             •{" "}
-            <a href="https://toolbox.socratica.info/credits" target="_self">
+            <a href="https://tarikakisamata/credits" target="_self">
               Credits
             </a>
           </p>
