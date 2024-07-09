@@ -3,19 +3,19 @@ import * as Plugin from "./quartz/plugins"
 
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Socratica Toolbox",
+    pageTitle: "Tarika Kisamata",
     enableSPA: true,
     enablePopovers: true,
     analytics: {
       provider: "google",
       tagId: "G-PBC0Y59ZMD"
     },
-    baseUrl: "toolbox.socratica.info",
+    baseUrl: "tarikakisamata",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "created",
     theme: {
       typography: {
-        header: "Tiempos",
+        header: "IBM Plex Serif",
         body: "PT Serif",
         code: "IBM Plex Mono",
       },

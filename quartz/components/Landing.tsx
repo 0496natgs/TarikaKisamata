@@ -6,7 +6,7 @@ export const CARDS = {
   basics: (
     <a href={"/basics"}>
       <div class="card card-1">
-        <p class="card-title">The Basics</p>
+        <p class="card-title">Who am I?</p>
         <p class="card-subhead">Issue 001</p>
         <img src="/static/1-illo.png" class="card-illustration-1" />
       </div>
@@ -24,7 +24,7 @@ export const CARDS = {
   "growing-people": (
     <a href={"/growing-people"}>
       <div class="card card-3">
-        <p class="card-title">Growing People</p>
+        <p class="card-title">Ankrverse</p>
         <p class="card-subhead">Issue 003</p>
         <img src="/static/3-illo.png" class="card-illustration-3" />
       </div>
@@ -57,9 +57,9 @@ export default (() => {
         <div class="content-container">
           <p class="landing-header">Tarika Kisamata</p>
           <p class="page-subhead">
-            This is a guide •{" "}
+            Website Guide •{" "}
             <a href="https://tarikakisamata.com/" target="_blank">
-              Back to main site
+              Ankrverse
             </a>{" "}
             •{" "}
             <a href="https://tarikakisamata.com" target="_blank">

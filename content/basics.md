@@ -5,7 +5,7 @@ issueNo: 1
 
 <div class="article-header">
 
-# What is Socratica?
+# What is Tarika Kisamata?
 
 Written by Anson Yu and Joss Murphy
 
