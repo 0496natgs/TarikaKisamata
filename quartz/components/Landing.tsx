@@ -1,7 +1,7 @@
 import { QuartzComponentConstructor } from "./types"
 import landingStyle from "./styles/landing.scss"
 
-export const TOTAL_CARDS = 8
+export const TOTAL_CARDS = 20
 export const CARDS = {
   basics: (
     <a href={"/basics"}>
