@@ -36,6 +36,7 @@ function notifyNav(url: FullSlug) {
 
 let p: DOMParser
 async function navigate(url: URL, isBack: boolean = false) {
+  startLoading()
   p = p || new DOMParser()
   const contents = await fetch(`${url}`)
     .then((res) => res.text())
@@ -83,6 +84,7 @@ async function navigate(url: URL, isBack: boolean = false) {
   if (!isBack) {
     history.pushState({}, "", url)
   }
+
   notifyNav(getFullSlug(window))
   delete announcer.dataset.persist
 }

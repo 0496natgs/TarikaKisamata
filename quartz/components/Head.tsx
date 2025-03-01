@@ -20,11 +20,33 @@ export default (() => {
         <title>{title}</title>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {/* OG/Twitter meta tags */}
+        <meta name="og:site_name" content={cfg.pageTitle}></meta>
         <meta property="og:title" content={title} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
         <meta property="og:description" content={description} />
-        {cfg.baseUrl && <meta property="og:image" content={ogImagePath} />}
-        <meta property="og:width" content="1200" />
-        <meta property="og:height" content="675" />
+        <meta property="og:image:type" content={`image/${extension}`} />
+        <meta property="og:image:alt" content={description} />
+        {/* Dont set width and height if unknown (when using custom frontmatter image) */}
+        {!frontmatterImgUrl && (
+          <>
+            <meta property="og:image:width" content={fullOptions.width.toString()} />
+            <meta property="og:image:height" content={fullOptions.height.toString()} />
+          </>
+        )}
+        <meta property="og:image:url" content={ogImagePath} />
+        {cfg.baseUrl && (
+          <>
+            <meta name="twitter:image" content={ogImagePath} />
+            <meta property="og:image" content={ogImagePath} />
+            <meta property="twitter:domain" content={cfg.baseUrl}></meta>
+            <meta property="og:url" content={socialUrl}></meta>
+            <meta property="twitter:url" content={socialUrl}></meta>
+          </>
+        )}
         <link rel="icon" href={iconPath} />
         <meta name="description" content={description} />
         <meta name="generator" content="Quartz" />

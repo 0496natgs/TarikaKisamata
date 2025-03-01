@@ -38,6 +38,7 @@ export const NotFoundPage: QuartzEmitterPlugin = () => {
         description: "Not Found",
         frontmatter: { title: "Not Found", tags: [] },
       })
+      const externalResources = pageResources(path, vfile.data, resources)
       const componentData: QuartzComponentProps = {
         fileData: vfile.data,
         externalResources,

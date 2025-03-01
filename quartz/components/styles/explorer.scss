@@ -9,7 +9,7 @@ button#explorer {
   display: flex;
   align-items: center;
 
-  & h1 {
+  & h2 {
     font-size: 1rem;
     display: inline-block;
     margin: 0;
@@ -43,12 +43,20 @@ button#explorer {
 #explorer-content {
   list-style: none;
   overflow: hidden;
-  max-height: none;
-  transition: max-height 0.35s ease;
+  overflow-y: auto;
+  max-height: 0px;
+  transition:
+    max-height 0.35s ease,
+    visibility 0s linear 0.35s;
   margin-top: 0.5rem;
+  visibility: hidden;
 
-  &.collapsed > .overflow::after {
-    opacity: 0;
+  &.collapsed {
+    max-height: 100%;
+    transition:
+      max-height 0.35s ease,
+      visibility 0s linear 0s;
+    visibility: visible;
   }
 
   & ul {
@@ -59,11 +67,16 @@ button#explorer {
       max-height 0.35s ease,
       transform 0.35s ease,
       opacity 0.2s ease;
+
     & li > a {
       color: var(--dark);
       opacity: 0.75;
       pointer-events: all;
     }
+  }
+
+  > #explorer-ul {
+    max-height: none;
   }
 }
 
@@ -143,4 +156,81 @@ div:has(> .folder-outer:not(.open)) > .folder-container > svg {
   height: 4px;
   // remove default margin from li
   margin: 0;
+}
+
+.explorer {
+  @media all and ($mobile) {
+    #explorer-content {
+      box-sizing: border-box;
+      overscroll-behavior: none;
+      z-index: 100;
+      position: absolute;
+      top: 0;
+      background-color: var(--light);
+      max-width: 100dvw;
+      left: -100dvw;
+      width: 100%;
+      transition: transform 300ms ease-in-out;
+      overflow: hidden;
+      padding: $topSpacing 2rem 2rem;
+      height: 100dvh;
+      max-height: 100dvh;
+      margin-top: 0;
+      visibility: hidden;
+
+      &:not(.collapsed) {
+        transform: translateX(100dvw);
+        visibility: visible;
+      }
+
+      ul.overflow {
+        max-height: 100%;
+        width: 100%;
+      }
+
+      &.collapsed {
+        transform: translateX(0);
+        visibility: visible;
+      }
+    }
+
+    #mobile-explorer {
+      margin: 5px;
+      z-index: 101;
+
+      &:not(.collapsed) .lucide-menu {
+        transform: rotate(-90deg);
+        transition: transform 200ms ease-in-out;
+      }
+
+      .lucide-menu {
+        stroke: var(--darkgray);
+        transition: transform 200ms ease;
+
+        &:hover {
+          stroke: var(--dark);
+        }
+      }
+    }
+  }
+}
+
+.no-scroll {
+  opacity: 0;
+  overflow: hidden;
+}
+
+html:has(.no-scroll) {
+  overflow: hidden;
+}
+
+@media all and not ($mobile) {
+  .no-scroll {
+    opacity: 1 !important;
+    overflow: auto !important;
+  }
+
+  html:has(.no-scroll) {
+    overflow: auto !important;
+  }
 }

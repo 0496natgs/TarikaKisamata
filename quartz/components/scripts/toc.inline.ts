@@ -18,7 +18,6 @@ function toggleToc(this: HTMLElement) {
   this.classList.toggle("collapsed")
   const content = this.nextElementSibling as HTMLElement
   content.classList.toggle("collapsed")
-  content.style.maxHeight = content.style.maxHeight === "0px" ? content.scrollHeight + "px" : "0px"
 }
 
 function setupToc() {

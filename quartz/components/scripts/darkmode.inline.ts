@@ -21,7 +21,6 @@ document.addEventListener("nav", () => {
   if (currentTheme === "dark") {
     toggleSwitch.checked = true
   }
-
   // Listen for changes in prefers-color-scheme
   const colorSchemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
   colorSchemeMediaQuery.addEventListener("change", (e) => {

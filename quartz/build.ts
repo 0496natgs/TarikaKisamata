@@ -18,8 +18,13 @@ import { trace } from "./util/trace"
 import { options } from "./util/sourcemap"
 import { Mutex } from "async-mutex"
 
+function newBuildId() {
+  return Math.random().toString(36).substring(2, 8)
+}
+
 async function buildQuartz(argv: Argv, mut: Mutex, clientRefresh: () => void) {
   const ctx: BuildCtx = {
+    buildId: newBuildId(),
     argv,
     cfg,
     allSlugs: [],

@@ -24,7 +24,7 @@ export default (() => {
               <circle cx="8" cy="8" r="7" />
             </g>
           </svg>
-        </div>
+        </button>
         <div id="search-container">
           <div id="search-space">
             <input

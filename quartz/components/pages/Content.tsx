@@ -1,3 +1,4 @@
+import { ComponentChildren } from "preact"
 import { htmlToJsx } from "../../util/jsx"
 import { QuartzComponentConstructor, QuartzComponentProps } from "../types"
 

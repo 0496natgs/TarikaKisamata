@@ -27,7 +27,7 @@ const defaultOptions: Options = {
   openLinksInNewTab: false,
 }
 
-export const CrawlLinks: QuartzTransformerPlugin<Partial<Options> | undefined> = (userOpts) => {
+export const CrawlLinks: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
     name: "LinkProcessing",

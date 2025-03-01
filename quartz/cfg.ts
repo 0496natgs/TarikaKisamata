@@ -2,6 +2,7 @@ import { ValidDateType } from "./components/Date"
 import { QuartzComponent } from "./components/types"
 import { ValidLocale } from "./i18n"
 import { PluginTypes } from "./plugins/types"
+import { SocialImageOptions } from "./util/og"
 import { Theme } from "./util/theme"
 
 export type Analytics =
@@ -17,9 +18,14 @@ export type Analytics =
       provider: "umami"
       websiteId: string
     }
+  | {
+      provider: "clarity"
+      projectId?: string
+    }
 
 export interface GlobalConfiguration {
   pageTitle: string
+  pageTitleSuffix?: string
   /** Whether to enable single-page-app style rendering. this prevents flashes of unstyled content and improves smoothness of Quartz */
   enableSPA: boolean
   /** Whether to display Wikipedia-style popovers when hovering over links */
@@ -34,6 +40,10 @@ export interface GlobalConfiguration {
    *   Quartz will avoid using this as much as possible and use relative URLs most of the time
    */
   baseUrl?: string
+  /**
+   * Whether to generate social images (Open Graph and Twitter standard) for link previews
+   */
+  generateSocialImages: boolean | Partial<SocialImageOptions>
   theme: Theme
   locale: ValidLocale
 }
@@ -48,10 +58,11 @@ export interface FullPageLayout {
   header: QuartzComponent[]
   beforeBody: QuartzComponent[]
   pageBody: QuartzComponent
+  afterBody: QuartzComponent[]
   left: QuartzComponent[]
   right: QuartzComponent[]
   footer: QuartzComponent
 }
 
 export type PageLayout = Pick<FullPageLayout, "beforeBody" | "left" | "right">
-export type SharedLayout = Pick<FullPageLayout, "head" | "header" | "footer">
+export type SharedLayout = Pick<FullPageLayout, "head" | "header" | "footer" | "afterBody">

@@ -13,7 +13,6 @@ import calloutScript from "../../components/scripts/callout.inline.ts"
 import { FilePath, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
 import { toHast } from "mdast-util-to-hast"
 import { toHtml } from "hast-util-to-html"
-import { PhrasingContent } from "mdast-util-find-and-replace/lib"
 import { capitalize } from "../../util/lang"
 
 export interface Options {
@@ -123,9 +122,7 @@ const calloutLineRegex = new RegExp(/^> *\[\!\w+\][+-]?.*$/, "gm")
 const tagRegex = new RegExp(/(?:^| )#((?:[-_\p{L}\d])+(?:\/[-_\p{L}\d]+)*)/, "gu")
 const blockReferenceRegex = new RegExp(/\^([A-Za-z0-9]+)$/, "g")
 
-export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options> | undefined> = (
-  userOpts,
-) => {
+export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
 
   const mdastToHtml = (ast: PhrasingContent | Paragraph) => {
@@ -378,12 +375,14 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options> 
 
       if (opts.mermaid) {
         plugins.push(() => {
-          return (tree: Root, _file) => {
+          return (tree: Root, file) => {
             visit(tree, "code", (node: Code) => {
               if (node.lang === "mermaid") {
+                file.data.hasMermaidDiagram = true
                 node.data = {
                   hProperties: {
                     className: ["mermaid"],
+                    "data-clipboard": JSON.stringify(node.value),
                   },
                 }
               }
@@ -481,10 +480,138 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options> 
         })
       }
 
+      if (opts.mermaid) {
+        plugins.push(() => {
+          return (tree: HtmlRoot, _file) => {
+            visit(tree, "element", (node: Element, _idx, parent) => {
+              if (
+                node.tagName === "code" &&
+                ((node.properties?.className ?? []) as string[])?.includes("mermaid")
+              ) {
+                parent!.children = [
+                  {
+                    type: "element",
+                    tagName: "button",
+                    properties: {
+                      className: ["expand-button"],
+                      "aria-label": "Expand mermaid diagram",
+                      "aria-hidden": "true",
+                      "data-view-component": true,
+                    },
+                    children: [
+                      {
+                        type: "element",
+                        tagName: "svg",
+                        properties: {
+                          width: 16,
+                          height: 16,
+                          viewBox: "0 0 16 16",
+                          fill: "currentColor",
+                        },
+                        children: [
+                          {
+                            type: "element",
+                            tagName: "path",
+                            properties: {
+                              fillRule: "evenodd",
+                              d: "M3.72 3.72a.75.75 0 011.06 1.06L2.56 7h10.88l-2.22-2.22a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.56l2.22 2.22a.75.75 0 11-1.06 1.06l-3.5-3.5a.75.75 0 010-1.06l3.5-3.5z",
+                            },
+                            children: [],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  node,
+                  {
+                    type: "element",
+                    tagName: "div",
+                    properties: { id: "mermaid-container" },
+                    children: [
+                      {
+                        type: "element",
+                        tagName: "div",
+                        properties: { id: "mermaid-space" },
+                        children: [
+                          {
+                            type: "element",
+                            tagName: "div",
+                            properties: { className: ["mermaid-header"] },
+                            children: [
+                              {
+                                type: "element",
+                                tagName: "button",
+                                properties: {
+                                  className: ["close-button"],
+                                  "aria-label": "close button",
+                                },
+                                children: [
+                                  {
+                                    type: "element",
+                                    tagName: "svg",
+                                    properties: {
+                                      "aria-hidden": "true",
+                                      xmlns: "http://www.w3.org/2000/svg",
+                                      width: 24,
+                                      height: 24,
+                                      viewBox: "0 0 24 24",
+                                      fill: "none",
+                                      stroke: "currentColor",
+                                      "stroke-width": "2",
+                                      "stroke-linecap": "round",
+                                      "stroke-linejoin": "round",
+                                    },
+                                    children: [
+                                      {
+                                        type: "element",
+                                        tagName: "line",
+                                        properties: {
+                                          x1: 18,
+                                          y1: 6,
+                                          x2: 6,
+                                          y2: 18,
+                                        },
+                                        children: [],
+                                      },
+                                      {
+                                        type: "element",
+                                        tagName: "line",
+                                        properties: {
+                                          x1: 6,
+                                          y1: 6,
+                                          x2: 18,
+                                          y2: 18,
+                                        },
+                                        children: [],
+                                      },
+                                    ],
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                          {
+                            type: "element",
+                            tagName: "div",
+                            properties: { className: ["mermaid-content"] },
+                            children: [],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ]
+              }
+            })
+          }
+        })
+      }
+
       return plugins
     },
     externalResources() {
       const js: JSResource[] = []
+      const css: CSSResource[] = []
 
       if (opts.callouts) {
         js.push({

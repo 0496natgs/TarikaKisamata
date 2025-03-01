@@ -1,6 +1,6 @@
 import { QuartzComponentConstructor, QuartzComponentProps } from "../types"
 import style from "../styles/listPage.scss"
-import { PageList } from "../PageList"
+import { PageList, SortFn } from "../PageList"
 import { FullSlug, getAllSegmentPrefixes, simplifySlug } from "../../util/path"
 import { QuartzPluginData } from "../../plugins/vfile"
 import { Root } from "hast"
@@ -12,15 +12,12 @@ function TagContent(props: QuartzComponentProps) {
   const { tree, fileData, allFiles } = props
   const slug = fileData.slug
 
-  if (!(slug?.startsWith("tags/") || slug === "tags")) {
-    throw new Error(`Component "TagContent" tried to render a non-tag page: ${slug}`)
-  }
+const defaultOptions: TagContentOptions = {
+  numPages: 10,
+}
 
-  const tag = simplifySlug(slug.slice("tags/".length) as FullSlug)
-  const allPagesWithTag = (tag: string) =>
-    allFiles.filter((file) =>
-      (file.frontmatter?.tags ?? []).flatMap(getAllSegmentPrefixes).includes(tag),
-    )
+export default ((opts?: Partial<TagContentOptions>) => {
+  const options: TagContentOptions = { ...defaultOptions, ...opts }
 
   const content =
     (tree as Root).children.length === 0
@@ -67,14 +64,13 @@ function TagContent(props: QuartzComponentProps) {
             )
           })}
         </div>
-      </div>
-    )
-  } else {
-    const pages = allPagesWithTag(tag)
-    const listProps = {
-      ...props,
-      allFiles: pages,
-    }
+      )
+    } else {
+      const pages = allPagesWithTag(tag)
+      const listProps = {
+        ...props,
+        allFiles: pages,
+      }
 
     return (
       <div class="popover-hint">
@@ -83,10 +79,10 @@ function TagContent(props: QuartzComponentProps) {
         <div>
           <PageList {...listProps} />
         </div>
-      </div>
-    )
+      )
+    }
   }
-}
 
-TagContent.css = style + PageList.css
-export default (() => TagContent) satisfies QuartzComponentConstructor
+  TagContent.css = style + PageList.css
+  return TagContent
+}) satisfies QuartzComponentConstructor

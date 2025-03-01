@@ -20,7 +20,14 @@ function toggleExplorer(this: HTMLElement) {
   this.classList.toggle("collapsed")
   const content = this.nextElementSibling as HTMLElement
   content.classList.toggle("collapsed")
-  content.style.maxHeight = content.style.maxHeight === "0px" ? content.scrollHeight + "px" : "0px"
+  content.classList.toggle("explorer-viewmode")
+
+  // Prevent scroll under
+  if (document.querySelector("#mobile-explorer")) {
+    // Disable scrolling on the page when the explorer is opened on mobile
+    const bodySelector = document.querySelector("#quartz-body")
+    if (bodySelector) bodySelector.classList.toggle("lock-scroll")
+  }
 }
 
 function toggleFolder(evt: MouseEvent) {
@@ -127,7 +134,17 @@ function setupExplorer() {
 }
 
 window.addEventListener("resize", setupExplorer)
+
 document.addEventListener("nav", () => {
+  const explorer = document.querySelector("#mobile-explorer")
+  if (explorer) {
+    explorer.classList.add("collapsed")
+    const content = explorer.nextElementSibling?.nextElementSibling as HTMLElement
+    if (content) {
+      content.classList.add("collapsed")
+      content.classList.toggle("explorer-viewmode")
+    }
+  }
   setupExplorer()
 
   // select pseudo element at end of list
@@ -137,6 +154,12 @@ document.addEventListener("nav", () => {
   if (lastItem) {
     observer.observe(lastItem as Element)
   }
+
+  // Hide explorer on mobile until it is requested
+  const hiddenUntilDoneLoading = document.querySelector("#mobile-explorer")
+  hiddenUntilDoneLoading?.classList.remove("hide-until-loaded")
+
+  toggleExplorerFolders()
 })
 
 /**
